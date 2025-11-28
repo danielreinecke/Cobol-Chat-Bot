@@ -41,8 +41,8 @@ collator = DataCollatorForLanguageModeling(
 training_args = TrainingArguments(
     output_dir="./qwen_small_cobol_tutor",
     per_device_train_batch_size=1,  #examples gpu sees at once
-    num_train_epochs=10,             #number of times to loop through dataset
-    learning_rate=5e-4,             #step size for optimization
+    num_train_epochs=1,             #number of times to loop through dataset
+    learning_rate=5e-3,             #step size for optimization
     logging_steps=1,                #how often to log training progress
     save_steps=5,                   #how often to save model checkpoints
     fp16=torch.cuda.is_available(), #use mixed precision if using GPU
@@ -57,4 +57,5 @@ trainer = Trainer(
 )
 
 trainer.train()
+trainer.save_model("./qwen_small_cobol_tutor") #save the fine-tuned model
 print("Training finished!")
