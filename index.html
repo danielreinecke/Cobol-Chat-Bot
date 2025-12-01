@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COBOL AI Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-1 { animation: bounce 1s infinite 0ms; }
+        .animate-bounce-2 { animation: bounce 1s infinite 150ms; }
+        .animate-bounce-3 { animation: bounce 1s infinite 300ms; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
+    <div class="flex flex-col h-screen">
+        <!-- Header -->
+        <div class="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 shadow-lg">
+            <div class="max-w-5xl mx-auto px-4 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-br from-blue-500 to-cyan-500 p-2 rounded-lg shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-white">COBOL AI Tutor</h1>
+                        <p class="text-sm text-slate-400">Learn mainframe programming with AI assistance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-6">
+            <div class="max-w-5xl mx-auto space-y-6">
+                <!-- Initial message -->
+                <div class="flex justify-start">
+                    <div class="max-w-3xl rounded-2xl px-5 py-4 shadow-lg bg-slate-800/80 backdrop-blur-sm text-slate-100 border border-slate-700/50">
+                        Hello! I'm your COBOL and JCL tutor. I can help you understand COBOL structure, debug errors, explain mainframe concepts, and more. What would you like to learn today?
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Prompts (shown initially) -->
+        <div id="quick-prompts" class="px-4 pb-4">
+            <div class="max-w-5xl mx-auto">
+                <p class="text-sm text-slate-400 mb-3 text-center">Try asking:</p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <button onclick="useQuickPrompt('Can you explain the structure of a COBOL program with DIVISIONS, SECTIONS, and PARAGRAPHS?')" 
+                            class="flex items-center gap-2 px-4 py-2 bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 rounded-xl border border-slate-700/50 transition-all hover:scale-105 shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                        <span class="text-sm">Explain COBOL structure</span>
+                    </button>
+                    <button onclick="useQuickPrompt('I got error code S0C7 in my program. What does it mean?')" 
+                            class="flex items-center gap-2 px-4 py-2 bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 rounded-xl border border-slate-700/50 transition-all hover:scale-105 shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span class="text-sm">Debug error codes</span>
+                    </button>
+                    <button onclick="useQuickPrompt('Explain what the DATA DIVISION does and how to use it.')" 
+                            class="flex items-center gap-2 px-4 py-2 bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 rounded-xl border border-slate-700/50 transition-all hover:scale-105 shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="text-sm">Learn DATA DIVISION</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="bg-slate-800/50 backdrop-blur-sm border-t border-slate-700/50 px-4 py-4">
+            <div class="max-w-5xl mx-auto">
+                <form id="chat-form" class="flex gap-3">
+                    <input 
+                        type="text" 
+                        id="user-input"
+                        placeholder="Ask about COBOL, JCL, or mainframe concepts..."
+                        class="flex-1 px-5 py-3 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 shadow-lg"
+                    />
+                    <button 
+                        type="submit"
+                        id="send-button"
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-medium transition-all shadow-lg hover:scale-105 flex items-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        <span class="hidden sm:inline">Send</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/chat';
+        let conversationHistory = [];
+        let messageCount = 0;
+
+        const messagesContainer = document.getElementById('messages-container');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const quickPrompts = document.getElementById('quick-prompts');
+
+        function addMessage(role, content) {
+            messageCount++;
+            
+            // Hide quick prompts after first message
+            if (messageCount > 1 && quickPrompts) {
+                quickPrompts.style.display = 'none';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `max-w-3xl rounded-2xl px-5 py-4 shadow-lg ${
+                role === 'user' 
+                    ? 'bg-gradient-to-br from-blue-600 to-cyan-600 text-white' 
+                    : 'bg-slate-800/80 backdrop-blur-sm text-slate-100 border border-slate-700/50'
+            }`;
+            contentDiv.style.whiteSpace = 'pre-wrap';
+            contentDiv.style.wordBreak = 'break-word';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.querySelector('.space-y-6').appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Store in history
+            conversationHistory.push({ role, content });
+        }
+
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.className = 'flex justify-start';
+            loadingDiv.innerHTML = `
+                <div class="bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-5 py-4 shadow-lg">
+                    <div class="flex items-center gap-2">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-cyan-500 rounded-full animate-bounce-1"></div>
+                            <div class="w-2 h-2 bg-cyan-500 rounded-full animate-bounce-2"></div>
+                            <div class="w-2 h-2 bg-cyan-500 rounded-full animate-bounce-3"></div>
+                        </div>
+                        <span class="text-slate-400 text-sm">Thinking...</span>
+                    </div>
+                </div>
+            `;
+            messagesContainer.querySelector('.space-y-6').appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('loading-indicator');
+            if (loading) loading.remove();
+        }
+
+        async function sendMessage(message) {
+            if (!message.trim()) return;
+
+            // Disable input
+            userInput.disabled = true;
+            sendButton.disabled = true;
+            sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Add user message
+            addMessage('user', message);
+            userInput.value = '';
+
+            // Show loading
+            showLoading();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversation_history: conversationHistory
+                    }),
+                });
+
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.response) {
+                    addMessage('assistant', data.response);
+                } else {
+                    addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                hideLoading();
+                addMessage('assistant', 'Sorry, I\'m having trouble connecting to the server. Please check that the backend is running at ' + API_URL);
+            } finally {
+                // Re-enable input
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                userInput.focus();
+            }
+        }
+
+        function useQuickPrompt(query) {
+            userInput.value = query;
+            userInput.focus();
+        }
+
+        // Form submit handler
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = userInput.value;
+            sendMessage(message);
+        });
+
+        // Focus input on load
+        userInput.focus();
+    </script>
+</body>
+</html>
