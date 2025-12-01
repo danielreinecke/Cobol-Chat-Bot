@@ -40,6 +40,7 @@ The training and knowledge base draws from:
 ### Prerequisites
 - Python 3.12+
 - Virtual environment (recommended)
+- GPU (optional, but recommended for faster inference)
 
 ### Installation
 
@@ -61,9 +62,80 @@ source chat/bin/activate     # On Linux/macOS
 pip install -r requirements.txt
 ```
 
+## Running the Project
+
+### Option 1: Full Stack (Backend + Frontend)
+
+**Terminal 1 - Start the Backend API:**
+```bash
+python backend.py
+```
+The backend will load your trained model and start the Flask server at `http://localhost:5000`
+
+**Terminal 2 - Open the Frontend:**
+Open `index.html` in your browser or use VS Code's Live Server extension
+
+### Option 2: Train the Model (First Time Only)
+
+If you haven't trained the model yet:
+```bash
+python training.py
+```
+This creates the fine-tuned model in `qwen_small_cobol_tutor/`
+
+### Option 3: Test the Model Directly
+
+Test the model without the web interface:
+```bash
+python small_LLM_test.py
+```
+This lets you interact with the model directly in the terminal
+
+## Project Structure
+
+- `backend.py` - Flask REST API server with model inference
+- `index.html` - Frontend chat interface (HTML/CSS/JavaScript)
+- `cobol.jsx` - React component for chat (optional)
+- `training.py` - Fine-tune Qwen model on COBOL data
+- `small_LLM_test.py` - Direct model testing script
+- `create_questions.py` - Generate training data for fine-tuning
+- `qwen_small_cobol_tutor/` - Fine-tuned model directory
+
+## API Endpoints
+
+- `GET /api/health` - Health check
+- `POST /api/chat` - Send a message and get a response
+
+### Chat Request Example:
+```json
+{
+    "message": "Explain COBOL DIVISIONS",
+    "conversation_history": [
+        {"role": "user", "content": "Hi"},
+        {"role": "assistant", "content": "Hello! How can I help?"}
+    ]
+}
+```
+
+## Features
+
+- **Interactive Chat Interface** - Beautiful dark-themed web UI
+- **Step-by-Step Guidance** - Learn COBOL concepts systematically
+- **Error Debugging** - Understand and fix COBOL/JCL errors
+- **Mainframe Knowledge** - Learn datasets, DD statements, return codes
+- **GPU Acceleration** - Faster inference with CUDA support
+
 ## Development
 
-This project uses:
-- Python 3.12
-- PyTorch with GPU support (CUDA 11.8)
-- Qwen language models
+### Model Configuration
+Edit `backend.py` to change which model loads:
+- `./qwen_small_cobol_tutor` - Your fine-tuned model (default)
+- `Qwen/Qwen2.5-1.5B-Instruct` - Small base model for testing
+- `Qwen/Qwen2.5-72B-Instruct` - Large production model
+
+### Training Customization
+Modify `training.py` to adjust:
+- Learning rate
+- Batch size
+- Number of epochs
+- Model checkpoint frequency
