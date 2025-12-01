@@ -34,12 +34,15 @@ collator = DataCollatorForLanguageModeling(
 #training arguments
 training_args = TrainingArguments(
     output_dir="./qwen_small_cobol_tutor",
-    per_device_train_batch_size=2,   #examples gpu sees at once
-    num_train_epochs=1,              #number of times to loop through dataset
-    learning_rate=5e-4,              #step size for optimization
+    per_device_train_batch_size=4,   #examples gpu sees at once
+    gradient_accumulation_steps=4, #to simulate larger batch size
+    num_train_epochs=5,              #number of times to loop through dataset
+    learning_rate=5e-5,              #step size for optimization
     logging_steps=10,                 #how often to log training progress
-    save_steps=100,                   #how often to save model checkpoints
+    save_steps=200,                   #how often to save model checkpoints
+    save_total_limit=2,             #maximum number of checkpoints to keep
     fp16=torch.cuda.is_available(), #use mixed precision if using GPU
+    shuffle=True,                   #shuffle data each epoch
 )
 
 #deine Trainer

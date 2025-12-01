@@ -132,11 +132,11 @@ def generate_response(user_message, conversation_history=None):
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=512,      # Maximum length of response (adjust as needed)
-            temperature=0.7,         # Controls randomness (0.1=deterministic, 1.0=very random)
-            top_p=0.9,              # Nucleus sampling - consider tokens with top 90% probability
-            do_sample=True,         # Use sampling instead of greedy decoding
-            pad_token_id=tokenizer.eos_token_id  # Use end-of-sequence token for padding
+            max_new_tokens=300,      # Maximum length of generated response
+            do_sample=True,          # Use sampling to generate responses
+            top_p=0.9,              # Nucleus sampling probability
+            temperature=0.7,         # Sampling temperature (randomness)
+            eos_token_id=tokenizer.eos_token_id  # End of sequence token
         )
     
     # ==================== DECODE AND EXTRACT RESPONSE ====================
@@ -152,9 +152,9 @@ def generate_response(user_message, conversation_history=None):
         
         # Remove any end markers or follow-up tags that might appear
         # These indicate where the model thinks the response should end
-        for end_marker in ["</", "<|user|>", "<|system|>"]:
-            if end_marker in assistant_response:
-                assistant_response = assistant_response.split(end_marker)[0].strip()
+        # for end_marker in ["</", "<|user|>", "<|system|>"]:
+        #     if end_marker in assistant_response:
+        #         assistant_response = assistant_response.split(end_marker)[0].strip()
         
         return assistant_response
     

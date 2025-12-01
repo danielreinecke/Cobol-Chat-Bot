@@ -84,3 +84,6 @@ Thumbs.db
 qwen_small_cobol_tutor/
 models/
 *.gguf
+
+# Personal notes/instructions
+little instructions for me.txt
