@@ -41,4 +41,19 @@ with torch.no_grad():   #tells pytorch we are not training
 #decode and print the response
 text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 print("Model Response:\n")
-print(text)
+
+# Extract only the first assistant's response
+if "<|assistant|>" in text:
+    # Split by assistant tag and take the first response after it
+    response_parts = text.split("<|assistant|>")
+    assistant_response = response_parts[1].strip()  # Take first occurrence after <|assistant|>
+    
+    # Stop at the next message marker if it exists
+    for marker in ["<|user|>", "<|system|>"]:
+        if marker in assistant_response:
+            assistant_response = assistant_response.split(marker)[0].strip()
+            break
+    
+    print(assistant_response)
+else:
+    print(text)

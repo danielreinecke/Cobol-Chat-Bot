@@ -42,7 +42,6 @@ training_args = TrainingArguments(
     save_steps=200,                   #how often to save model checkpoints
     save_total_limit=2,             #maximum number of checkpoints to keep
     fp16=torch.cuda.is_available(), #use mixed precision if using GPU
-    shuffle=True,                   #shuffle data each epoch
 )
 
 #deine Trainer

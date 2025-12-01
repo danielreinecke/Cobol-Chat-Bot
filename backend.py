@@ -52,11 +52,12 @@ def load_model():
     #   - "Qwen/Qwen2.5-1.5B-Instruct" (base model for testing)
     #   - "Qwen/Qwen2.5-72B-Instruct" (full production model)
     model_path = "./qwen_small_cobol_tutor"
+    base_model_name = "Qwen/Qwen2.5-0.5B-Instruct"  # Base model for tokenizer (same as small_LLM_test.py)
     
     print("Loading model...")
     
-    # Load the tokenizer (converts text to token IDs and vice versa)
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    # Load the tokenizer from the base model (matches small_LLM_test.py)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     
     # Load the model with automatic device mapping (GPU if available, CPU otherwise)
     model = AutoModelForCausalLM.from_pretrained(
@@ -67,6 +68,7 @@ def load_model():
     # Manually move model to the correct device (CPU or GPU)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = model.to(device)
+    model.eval()  # Set model to evaluation mode (matches small_LLM_test.py)
     print(f"Model loaded successfully on {device}!")
     print(f"Using device: {'GPU' if torch.cuda.is_available() else 'CPU'}")
 
@@ -109,8 +111,8 @@ def generate_response(user_message, conversation_history=None):
         do_sample: Enable sampling (vs greedy decoding)
     """
     # ==================== BUILD THE PROMPT ====================
-    # Start with system message that defines the assistant's role
-    prompt = "<|system|>\nYou are a friendly COBOL and JCL tutor.\n\n"
+    # Start with system message that defines the assistant's role (matches small_LLM_test.py)
+    prompt = "<|system|>\nYou are a friendly COBOL tutor.\n\n"
     
     # Add conversation history for context (keep last 4 messages to avoid token limit)
     if conversation_history:
@@ -122,6 +124,9 @@ def generate_response(user_message, conversation_history=None):
     
     # Add the current user message and assistant tag (model will complete this)
     prompt += f"<|user|>\n{user_message}\n\n<|assistant|>\n"
+    
+    # Debug: Print the full prompt
+    print(f"\n[DEBUG GENERATE] Full prompt:\n{prompt}\n")
     
     # ==================== TOKENIZE INPUT ====================
     # Convert text to token IDs and move to the model's device (GPU/CPU)
@@ -140,23 +145,33 @@ def generate_response(user_message, conversation_history=None):
         )
     
     # ==================== DECODE AND EXTRACT RESPONSE ====================
-    # Convert token IDs back to text
-    full_response = tokenizer.decode(outputs[0], skip_special_tokens=False)
+    # Convert token IDs back to text (skip special tokens like small_LLM_test.py)
+    full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     
-    # Extract just the assistant's response from the generated text
-    # The model generates the entire prompt + new response, we only want the new part
-    if "<|assistant|>" in full_response:
-        # Split by assistant tag and take the last occurrence (the new response)
-        response_parts = full_response.split("<|assistant|>")
-        assistant_response = response_parts[-1].strip()
+    # Debug: Print full response from model
+    print(f"\n[DEBUG] Full model output:\n{full_response}\n")
+    
+    # Extract the assistant response that comes AFTER the last <|user|> tag
+    # This ensures we get the response to the current message, not from conversation history
+    if "<|user|>" in full_response and "<|assistant|>" in full_response:
+        # Find the last user message (current one)
+        last_user_pos = full_response.rfind("<|user|>")
+        # Find the first assistant response after that
+        after_user = full_response[last_user_pos:]
         
-        # Remove any end markers or follow-up tags that might appear
-        # These indicate where the model thinks the response should end
-        # for end_marker in ["</", "<|user|>", "<|system|>"]:
-        #     if end_marker in assistant_response:
-        #         assistant_response = assistant_response.split(end_marker)[0].strip()
-        
-        return assistant_response
+        if "<|assistant|>" in after_user:
+            # Split and take the first assistant response after the last user message
+            response_parts = after_user.split("<|assistant|>")
+            assistant_response = response_parts[1].strip() if len(response_parts) > 1 else ""
+            
+            # Stop at the next message marker if it exists
+            for marker in ["<|user|>", "<|system|>"]:
+                if marker in assistant_response:
+                    assistant_response = assistant_response.split(marker)[0].strip()
+                    break
+            
+            print(f"[DEBUG] Extracted assistant response:\n{assistant_response}\n")
+            return assistant_response
     
     # Fallback if we can't parse the response properly
     return "I apologize, but I couldn't generate a proper response. Please try again."
@@ -208,12 +223,23 @@ def chat():
         user_message = data.get('message', '')
         conversation_history = data.get('conversation_history', [])
         
+        # Debug: Print the incoming message and history
+        print(f"\n[DEBUG] User message: '{user_message}'")
+        print(f"[DEBUG] Conversation history length: {len(conversation_history)}")
+        if conversation_history:
+            print(f"[DEBUG] Conversation history:")
+            for i, msg in enumerate(conversation_history):
+                print(f"  [{i}] {msg['role']}: {msg['content'][:50]}...")
+        
         # Validate that a message was provided
         if not user_message:
             return jsonify({'error': 'No message provided'}), 400
         
         # ==================== GENERATE RESPONSE ====================
         response = generate_response(user_message, conversation_history)
+        
+        # Debug: Print the generated response
+        print(f"[DEBUG] Generated response: {response[:100]}...")
         
         # Return successful response
         return jsonify({
