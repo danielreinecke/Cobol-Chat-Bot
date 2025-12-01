@@ -20,7 +20,7 @@ model.eval()
 #create the prompt to see what it learned
 prompt = (
     "<|system|>\nYou are a friendly COBOL tutor.\n\n"
-    "<|user|>\nExplain what the DATA DIVISION does.\n\n"
+    "<|user|>\n" + str(input("Question: ")) + "\n\n"
     "<|assistant|>\n"
 )
 
