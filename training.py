@@ -14,6 +14,14 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(device)
 
 #load in training data
 train_samples = generate_combined_training_samples()
+#add end of sequence token to outputs if not present
+EOS = "<|im_end|>"
+for sample in train_samples:
+    # ensure there's exactly one EOS at the end
+    if not sample["text"].rstrip().endswith(EOS):
+        sample["text"] = sample["text"].rstrip() + "\n" + EOS + "\n"
+
+print(train_samples[0])  #print first sample to verify
 print(f"Number of training samples: {len(train_samples)}")
 
 def preprocess(example):

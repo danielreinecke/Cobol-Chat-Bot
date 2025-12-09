@@ -1,4 +1,198 @@
-# cobol_error_prompts.py
+CODE_MAP = {
+    "Dispalys a name" : (
+        """IDENTIFICATION DIVISION.
+        PROGRAM-ID. NAME.
+        DATA DIVISION.
+
+        "PROCEDURE DIVISION.
+           "DISPLAY 'YOUR NAME HERE'.
+           GOBACK."""
+    ),
+
+     "Display name from input" : (
+       """IDENTIFICATION DIVISION.
+       PROGRAM-ID. HELLO.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  NAME    PIC X(20) VALUE SPACES.
+
+       PROCEDURE DIVISION.
+           DISPLAY "ENTER YOUR NAME: ".
+           ACCEPT NAME.
+           DISPLAY NAME.
+           GOBACK."""
+    ),
+
+    
+    "Add records to a sequential file": (
+      """
+      *---------------------------------------------------------
+      * EXAMPLE PROGRAM TO ACCEPT FIRST AND LAST NAMES AND ADD TO A FILE
+      *-------------------------------------------------------- 
+       
+       IDENTIFICATION DIVISION.
+           PROGRAM-ID. READFILE.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      *    Declare READ-FILE
+	       SELECT OPTIONAL READ-FILE ASSIGN TO READFILE
+              ORGANIZATION IS SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+      *    Define READ-FILE structure
+       FD  READ-FILE RECORDING MODE F
+           LABEL RECORDS ARE STANDARD.
+       01  READ-INFO.
+           05 LAST-NAME   PIC X(20).
+           05 FIRST-NAME  PIC X(20).
+
+       WORKING-STORAGE SECTION.
+       01  PROMPT-1    PIC X(9) VALUE "Last Name".
+       01  PROMPT-2    PIC X(10) VALUE "First Name".
+
+       01  YES-NO      PIC X.
+       01  ENTRY-OK    PIC X.
+
+       PROCEDURE DIVISION.
+       MAIN-LOGIC SECTION.
+       PROGRAM-BEGIN.
+           PERFORM OPENING-PROCEDURE.
+           MOVE "Y" TO YES-NO.
+           PERFORM ADD-RECORDS
+              UNTIL YES-NO = "N".
+           PERFORM CLOSING-PROCEDURE.
+       PROGRAM-DONE.
+           STOP RUN.
+      * ---------------------------------------------------------
+      * Open READ-FILE for APPENDING. If the file does not exist
+      * it is created (due to our SELECT OPTIONAL)
+      * ---------------------------------------------------------
+       OPENING-PROCEDURE.
+           OPEN EXTEND READ-FILE.
+
+       CLOSING-PROCEDURE.
+           CLOSE READ-FILE.
+
+       ADD-RECORDS.
+           MOVE "N" to ENTRY-OK.
+           PERFORM GET-FIELDS
+              UNTIL ENTRY-OK = "Y".
+           PERFORM ADD-THIS-RECORD.
+           PERFORM GO-AGAIN.
+
+       GET-FIELDS.
+           MOVE SPACE TO READ-INFO.
+           DISPLAY PROMPT-1 " ? ".
+           ACCEPT LAST-NAME.
+           DISPLAY PROMPT-2 " ? ".
+           ACCEPT FIRST-NAME.
+
+       VALIDATE-FIELDS.
+           MOVE "Y" to ENTRY-OK.
+           IF LAST-NAME = SPACE
+              DISPLAY "LAST NAME IS REQUIRED"
+              MOVE "N" TO ENTRY-OK.
+           IF FIRST-NAME  = SPACE
+              DISPLAY "FIRST NAME IS REQUIRED"
+              MOVE "N" TO ENTRY-OK.
+
+       ADD-THIS-RECORD.
+           WRITE READ-INFO.
+
+       GO-AGAIN.
+           DISPLAY "Enter Another ?".
+           ACCEPT YES-NO.
+           IF YES-NO = "Y"
+              MOVE "Y" to YES-NO.
+           IF YES-NO NOT = "Y"
+              MOVE "N" to YES-NO."""
+    ),
+
+    "Read in a file and display records": (
+      """
+      *-----------------------
+      * COBOL PROGRAM TO DEMONSTRATE READING A SEQUENTIAL FILE
+      *-----------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PHONELST.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT READ-FILE ASSIGN TO READFILE
+              ORGANIZATION IS SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD   READ-FILE RECORDING MODE F
+           LABEL RECORDS ARE STANDARD.
+       01  PHONE-RECORD.
+           05 LAST-NAME   PIC X(20).
+           05 FIRST-NAME  PIC X(20).
+
+       WORKING-STORAGE SECTION.
+       01 FIELDS-TO-DISPLAY.
+           05 PROMPT-1           PIC X(10) VALUE "Last Name:".
+           05 DISPLAY-LAST-NAME  PIC X(20).
+           05 PROMPT-2           PIC X(6) VALUE "First:".
+           05 DISPLAY-FIRST-NAME PIC X(20).
+
+       01 END-OF-FILE  PIC X.
+
+       01 SCREEN-LINES PIC 99.
+       01 DUMMYIN      PIC X.
+
+       PROCEDURE DIVISION.
+       MAIN-LOGIC SECTION.
+       PROGRAM-BEGIN.
+
+           PERFORM OPENING-PROCEDURE.
+           MOVE ZEROES TO SCREEN-LINES.
+           MOVE "N" TO END-OF-FILE.
+           PERFORM READ-NEXT-RECORD.
+           PERFORM DISPLAY-RECORDS
+              UNTIL END-OF-FILE = "Y".
+           PERFORM CLOSING-PROCEDURE.
+
+       PROGRAM-DONE.
+           STOP RUN.
+
+       OPENING-PROCEDURE.
+           OPEN INPUT READ-FILE.
+
+       CLOSING-PROCEDURE.
+           CLOSE READ-FILE.
+
+       DISPLAY-RECORDS.
+           PERFORM DISPLAY-FIELDS.
+           PERFORM READ-NEXT-RECORD.
+
+       DISPLAY-FIELDS.
+           IF SCREEN-LINES = 25
+              PERFORM PRESS-ENTER.
+           MOVE LAST-NAME TO DISPLAY-LAST-NAME.
+           MOVE FIRST-NAME TO DISPLAY-FIRST-NAME.
+           DISPLAY FIELDS-TO-DISPLAY.
+
+      * Read the next record from the read file
+      * if we reach the end, we sent END-OF-FILE
+      * to Y
+       READ-NEXT-RECORD.
+           READ READ-FILE NEXT RECORD
+              AT END
+              MOVE "Y" TO END-OF-FILE.
+
+      * Prompt the user to press enter
+      * Use as a simple method of screen paging
+       PRESS-ENTER.
+           DISPLAY "Press ENTER to continue.........".
+           ACCEPT DUMMYIN.
+           MOVE ZEROES TO SCREEN-LINES."""
+    )
+
+}
 GENERAL_MAP = {
     # General information about COBOL programming
     "Sequence Number Area": (
@@ -26,69 +220,6 @@ GENERAL_MAP = {
     "Reserved Words": (
         "These are words with fixed meanings in COBOL and cannot be used for other purposes. "
         "Examples include PERFORM, MOVE, COMPUTE, IF, THEN, ELSE, EVALUATE, and PICTURE."
-    ),
-
-    "List of Reserved Words": (
-        "+, -, *, /, **, >, <, =, ==, >=, <=, <>, *>, >>, ACCEPT, ACCESS, ACTIVE-CLASS, ADD, "
-        "ADDRESS, ADVANCING, AFTER, ALIGNED, ALL, ALLOCATE, ALPHABET, ALPHABETIC, "
-        "ALPHABETIC-LOWER, ALPHABETIC-UPPER, ALPHANUMERIC, ALPHANUMERIC-EDITED, ALSO, ALTER, "
-        "ALTERNATE, AND, ANY, ANYCASE, APPLY, ARE, AREA, AREAS, ASCENDING, ASSIGN, AT, AUTHOR, "
-        "B-AND, B-NOT, B-OR, B-XOR, BASED, BASIS, BEFORE, BEGINNING, BINARY, BINARY-CHAR, "
-        "BINARY-DOUBLE, BINARY-LONG, BINARY-SHORT, BIT, BLANK, BLOCK, BOOLEAN, BOTTOM, BY, "
-        "BYTE-LENGTH, CALL, CANCEL, CBL, CD, CF, CH, CHARACTER, CHARACTERS, CLASS, CLASS-ID, "
-        "CLOCK-UNITS, CLOSE, COBOL, CODE, CODE-SET, COL, COLLATING, COLS, COLUMN, COLUMNS, "
-        "COM-REG, COMMA, COMMON, COMMUNICATION, COMP, COMP-1, COMP-2, COMP-3, COMP-4, COMP-5, "
-        "COMPUTATIONAL, COMPUTATIONAL-1, COMPUTATIONAL-2, COMPUTATIONAL-3, COMPUTATIONAL-4, "
-        "COMPUTATIONAL-5, COMPUTE, CONDITION, CONFIGURATION, CONSTANT, CONTAINS, CONTENT, "
-        "CONTINUE, CONTROL, CONTROLS, CONVERTING, COPY, CORR, CORRESPONDING, COUNT, CRT, "
-        "CURRENCY, CURSOR, DATA, DATA-POINTER, DATE, DATE-COMPILED, DATE-WRITTEN, DAY, "
-        "DAY-OF-WEEK, DBCS, DE, DEBUG-CONTENTS, DEBUG-ITEM, DEBUG-LINE, DEBUG-NAME, "
-        "DEBUG-SUB-1, DEBUG-SUB-2, DEBUG-SUB-3, DEBUGGING, DECIMAL-POINT, DECLARATIVES, "
-        "DEFAULT, DELETE, DELIMITED, DELIMITER, DEPENDING, DESCENDING, DESTINATION, DETAIL, "
-        "DISABLE, DISPLAY, DISPLAY-1, DIVIDE, DIVISION, DOWN, DUPLICATES, DYNAMIC, EC, EGCS, "
-        "EGI, EJECT, ELSE, EMI, ENABLE, END, END-ACCEPT, END-ADD, END-CALL, END-COMPUTE, "
-        "END-DELETE, END-DISPLAY, END-DIVIDE, END-EVALUATE, END-EXEC, END-IF, END-INVOKE, "
-        "END-JSON, END-MULTIPLY, END-OF-PAGE, END-PERFORM, END-READ, END-RECEIVE, END-RETURN, "
-        "END-REWRITE, END-SEARCH, END-START, END-STRING, END-SUBTRACT, END-UNSTRING, END-WRITE, "
-        "END-XML, ENDING, ENTER, ENTRY, ENVIRONMENT, EO, EOP, EQUAL, ERROR, ESI, EVALUATE, "
-        "EVERY, EXCEPTION, EXCEPTION-OBJECT, EXEC, EXECUTE, EXIT, EXTEND, EXTERNAL, FACTORY, "
-        "FALSE, FD, FILE, FILE-CONTROL, FILLER, FINAL, FIRST, FLOAT-EXTENDED, FLOAT-LONG, "
-        "FLOAT-SHORT, FOOTING, FOR, FORMAT, FREE, FROM, FUNCTION, FUNCTION-ID, FUNCTION-POINTER, "
-        "GENERATE, GET, GIVING, GLOBAL, GO, GOBACK, GREATER, GROUP, GROUP-USAGE, HEADING, "
-        "HIGH-VALUE, HIGH-VALUES, I-O, I-O-CONTROL, ID, IDENTIFICATION, IF, IN, INDEX, INDEXED, "
-        "INDICATE, INHERITS, INITIAL, INITIALIZE, INITIATE, INPUT, INPUT-OUTPUT, INSERT, "
-        "INSPECT, INSTALLATION, INTERFACE, INTERFACE-ID, INTO, INVALID, INVOKE, IS, JAVA, "
-        "JNIENVPTR, JSON, JSON-CODE, JSON-STATUS, JUST, JUSTIFIED, KANJI, KEY, LABEL, LAST, "
-        "LEADING, LEFT, LENGTH, LESS, LIMIT, LIMITS, LINAGE, LINAGE-COUNTER, LINE, "
-        "LINE-COUNTER, LINES, LINKAGE, LOCAL-STORAGE, LOCALE, LOCK, LOW-VALUE, LOW-VALUES, "
-        "MEMORY, MERGE, MESSAGE, METHOD, METHOD-ID, MINUS, MODE, MODULES, MORE-LABELS, MOVE, "
-        "MULTIPLE, MULTIPLY, NATIONAL, NATIONAL-EDITED, NATIVE, NEGATIVE, NESTED, NEXT, NO, "
-        "NOT, NULL, NULLS, NUMBER, NUMERIC, NUMERIC-EDITED, OBJECT, OBJECT-COMPUTER, "
-        "OBJECT-REFERENCE, OCCURS, OF, OFF, OMITTED, ON, OPEN, OPTIONAL, OPTIONS, OR, ORDER, "
-        "ORGANIZATION, OTHER, OUTPUT, OVERFLOW, OVERRIDE, PACKED-DECIMAL, PADDING, PAGE, "
-        "PAGE-COUNTER, PASSWORD, PERFORM, PF, PH, PIC, PICTURE, PLUS, POINTER, POINTER-24, "
-        "POINTER-31, POINTER-32, POINTER-64, POSITION, POSITIVE, PRESENT, PRINTING, PROCEDURE, "
-        "PROCEDURE-POINTER, PROCEDURES, PROCEED, PROCESSING, PROGRAM, PROGRAM-ID, "
-        "PROGRAM-POINTER, PROPERTY, PROTOTYPE, PURGE, QUEUE, QUOTE, QUOTES, RAISE, RAISING, "
-        "RANDOM, RD, READ, READY, RECEIVE, RECORD, RECORDING, RECORDS, RECURSIVE, REDEFINES, "
-        "REEL, REFERENCE, REFERENCES, RELATIVE, RELEASE, RELOAD, REMAINDER, REMOVAL, RENAMES, "
-        "REPLACE, REPLACING, REPORT, REPORTING, REPORTS, REPOSITORY, RERUN, RESERVE, RESET, "
-        "RESUME, RETRY, RETURN, RETURN-CODE, RETURNING, REVERSED, REWIND, REWRITE, RF, RH, "
-        "RIGHT, ROUNDED, RUN, SAME, SCREEN, SD, SEARCH, SECTION, SECURITY, SEGMENT, "
-        "SEGMENT-LIMIT, SELECT, SELF, SEND, SENTENCE, SEPARATE, SEQUENCE, SEQUENTIAL, SERVICE, "
-        "SET, SHARING, SHIFT-IN, SHIFT-OUT, SIGN, SIZE, SKIP1, SKIP2, SKIP3, SORT, SORT-CONTROL, "
-        "SORT-CORE-SIZE, SORT-FILE-SIZE, SORT-MERGE, SORT-MESSAGE, SORT-MODE-SIZE, SORT-RETURN, "
-        "SOURCE, SOURCE-COMPUTER, SOURCES, SPACE, SPACES, SPECIAL-NAMES, SQL, SQLIMS, STANDARD, "
-        "STANDARD-1, STANDARD-2, START, STATUS, STOP, STRING, SUB-QUEUE-1, SUB-QUEUE-2, "
-        "SUB-QUEUE-3, SUBTRACT, SUM, SUPER, SUPPRESS, SYMBOLIC, SYNC, SYNCHRONIZED, "
-        "SYSTEM-DEFAULT, TABLE, TALLY, TALLYING, TAPE, TERMINAL, TERMINATE, TEST, TEXT, THAN, "
-        "THEN, THROUGH, THRU, TIME, TIMES, TITLE, TO, TOP, TRACE, TRAILING, TRUE, TYPE, "
-        "TYPEDEF, UNIT, UNIVERSAL, UNLOCK, UNSTRING, UNTIL, UP, UPON, USAGE, USE, USER-DEFAULT, "
-        "USING, UTF-8, VAL-STATUS, VALID, VALIDATE, VALIDATE-STATUS, VALUE, VALUES, VARYING, "
-        "VOLATILE, WHEN, WHEN-COMPILED, WITH, WORDS, WORKING-STORAGE, WRITE, WRITE-ONLY, XML, "
-        "XML-CODE, XML-EVENT, XML-INFORMATION, XML-NAMESPACE, XML-NAMESPACE-PREFIX, "
-        "XML-NNAMESPACE, XML-NNAMESPACE-PREFIX, XML-NTEXT, XML-SCHEMA, XML-TEXT, ZERO, ZEROES, "
-        "ZEROS"
     ),
 
     "Cobol Statements": (
@@ -359,6 +490,14 @@ ERROR_QUESTION_TEMPLATES = [
     "Why would my job fail with {code}?",
 ]
 
+CODE_EXAMPLES = [
+    "how would I write a COBOL program that {description}?",
+    "create a COBOL code example that {description}."
+    "Give me a COBOL program that {description}.",
+    "Show me a COBOL code snippet that {description}.",
+    "Provide a sample COBOL program that {description}."
+]
+
 
 
 def generate_error_samples():
@@ -399,8 +538,27 @@ def generate_general_samples():
 
     return samples
 
+def generate_code_example_samples():
+    samples = []
+
+    for example in CODE_EXAMPLES:
+        for description, code in CODE_MAP.items():
+            user_question = example.format(description=description)
+
+            sample = (
+                "<|user|>\n"
+                f"{user_question}\n\n"
+                "<|assistant|>\n"
+                f"Here is an example COBOL program that {description}:\n\n{code}\n\n"
+            )
+
+            samples.append({"text": sample})
+
+    return samples
+
 def generate_combined_training_samples():
     samples = []
     samples.extend(generate_general_samples())
     samples.extend(generate_error_samples())
+    samples.extend(generate_code_example_samples())
     return samples

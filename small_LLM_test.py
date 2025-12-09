@@ -31,7 +31,7 @@ inputs = tokenizer(prompt, return_tensors="pt").to(device)
 with torch.no_grad():   #tells pytorch we are not training
     outputs = model.generate(   #using the model
         **inputs,       #unpack the tokenized inputs
-        max_new_tokens=300, #maximum length of generated response
+        max_new_tokens=2000, #maximum length of generated response
         do_sample=True,     #use sampling to generate responses
         top_p=0.9,          #nucleus sampling probability
         temperature=0.7,    #sampling temperature (randomness)
