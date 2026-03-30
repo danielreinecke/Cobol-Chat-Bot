@@ -1,5 +1,6 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, DataCollatorForLanguageModeling, Trainer
+from peft import get_peft_model, LoraConfig, TaskType
 from create_questions import generate_combined_training_samples
 
 MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct" #use Qwen/Qwen2.5-72B-Instruct for full size model
@@ -11,6 +12,20 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 device = "cuda" if torch.cuda.is_available() else "cpu" #load gpu if you have it
 
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(device)
+
+#configure LoRA
+lora_config = LoraConfig(
+    r=8,                           # rank of LoRA matrices
+    lora_alpha=16,                 # scaling factor
+    target_modules=["q_proj", "v_proj"],  # which layers to apply LoRA to
+    lora_dropout=0.05,             # dropout for LoRA layers
+    bias="none",                   # no bias in LoRA
+    task_type=TaskType.CAUSAL_LM   # task type
+)
+
+#wrap model with LoRA
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters()  # print number of trainable params
 
 #load in training data
 train_samples = generate_combined_training_samples()
@@ -53,5 +68,6 @@ trainer = Trainer(
 )
 
 trainer.train()
-trainer.save_model("./qwen_small_cobol_tutor") #save the fine-tuned model
-print("Training finished!")
+model.save_pretrained("./qwen_small_cobol_tutor")  # save LoRA adapters
+tokenizer.save_pretrained("./qwen_small_cobol_tutor")  # save tokenizer
+print("Training finished! LoRA adapters saved.")

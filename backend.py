@@ -16,6 +16,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS  # Enable Cross-Origin Resource Sharing for React frontend
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import AutoPeftModelForCausalLM
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -59,17 +60,17 @@ def load_model():
     # Load the tokenizer from the base model (matches small_LLM_test.py)
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     
-    # Load the model with automatic device mapping (GPU if available, CPU otherwise)
-    model = AutoModelForCausalLM.from_pretrained(
+    # Load the model with LoRA adapters using AutoPeftModelForCausalLM
+    model = AutoPeftModelForCausalLM.from_pretrained(
         model_path,
         # Use half precision (float16) on GPU for memory efficiency, full precision (float32) on CPU
-        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+        dtype=torch.float16 if torch.cuda.is_available() else torch.float32
     )
     # Manually move model to the correct device (CPU or GPU)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = model.to(device)
     model.eval()  # Set model to evaluation mode (matches small_LLM_test.py)
-    print(f"Model loaded successfully on {device}!")
+    print(f"Model with LoRA adapters loaded successfully on {device}!")
     print(f"Using device: {'GPU' if torch.cuda.is_available() else 'CPU'}")
 
 def generate_response(user_message, conversation_history=None):
@@ -309,11 +310,11 @@ if __name__ == '__main__':
     
     # Print helpful information about the server
     print("\n" + "="*60)
-    print("🚀 COBOL Tutor API Server Starting...")
+    print("COBOL Tutor API Server Starting...")
     print("="*60)
-    print("📍 API will be available at: http://localhost:5000")
-    print("🔧 Health check: http://localhost:5000/api/health")
-    print("💬 Chat endpoint: POST http://localhost:5000/api/chat")
+    print("API will be available at: http://localhost:5000")
+    print("Health check: http://localhost:5000/api/health")
+    print("Chat endpoint: POST http://localhost:5000/api/chat")
     print("="*60 + "\n")
     
     # Start the Flask development server

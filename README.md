@@ -129,7 +129,6 @@ This lets you interact with the model directly in the terminal
 
 ### Model Configuration
 Edit `backend.py` to change which model loads:
-- `./qwen_small_cobol_tutor` - Your fine-tuned model (default)
 - `Qwen/Qwen2.5-1.5B-Instruct` - Small base model for testing
 - `Qwen/Qwen2.5-72B-Instruct` - Large production model
 
