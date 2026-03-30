@@ -1,0 +1,5 @@
+       PROCEDURE DIVISION.
+           DISPLAY 'z/Osprey Chat-Bot'.
+           DISPLAY 'Greetings from the transformer'.
+           DISPLAY 'CURRENT DAY: ' FUNCTION CURRENT-DATE.
+           GOBACK.

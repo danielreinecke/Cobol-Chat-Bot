@@ -1,0 +1,22 @@
+*-------------
+DATA DIVISION.
+*-------------
+*-------------
+FILE SECTION.
+*-------------
+FD   EX-FILE RECORDING MODE F
+    LABEL RECORDS ARE STANDARD.
+* file structurE
+01 EX-RECORD.
+    05 READ-NAME      PIC X(40).
+    05 BLANK-SPACE         PIC X(4).
+FD  RESULT-FILE
+    LABEL RECORDS ARE STANDARD.
+01  RESULT-LINE.
+    05 OUTPUT-LINE          PIC X(132) VALUE SPACES.
+*------------------------
+WORKING-STORAGE SECTION.
+*------------------------
+01 START-DAY             PIC 99.
+01 START-MONTH           PIC 99.
+01 START-YEAR            PIC 9999.

@@ -1,25 +1,30 @@
-#RUN THE testing_chat_bot.py before running this file to ensure the fine-tuned model is created
+#RUN THE training.py before running this file to ensure the fine-tuned model is created
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from peft import AutoPeftModelForCausalLM
+
+#handle token issues
+fix_mistral_regex=True
 
 #set defined model paths
 BASE_MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
 FINETUNED_DIR = "./qwen_small_cobol_tutor"
 
 #set up tokenizer
-tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME)
+tokenizer = AutoTokenizer.from_pretrained(FINETUNED_DIR, fix_mistral_regex=True)
 
 #check for gpu
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-#load the fine-tuned model
-model = AutoModelForCausalLM.from_pretrained(FINETUNED_DIR)
+#load the fine-tuned model with LoRA adapters
+model = AutoPeftModelForCausalLM.from_pretrained(FINETUNED_DIR)
+model = model.merge_and_unload()  #merge LoRA adapters with base model
 model.to(device)
 model.eval()
 
 #create the prompt to see what it learned
 prompt = (
-    "<|system|>\nYou are a friendly COBOL tutor.\n\n"
+    "<|system|>\nYou are a helpful COBOL tutor assistant.\n\n"
     "<|user|>\n" + str(input("Question: ")) + "\n\n"
     "<|assistant|>\n"
 )
