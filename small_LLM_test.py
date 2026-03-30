@@ -3,9 +3,6 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import AutoPeftModelForCausalLM
 
-#handle token issues
-fix_mistral_regex=True
-
 #set defined model paths
 BASE_MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
 FINETUNED_DIR = "./qwen_small_cobol_tutor"
