@@ -1,0 +1,93 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ANNUITY.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 TOTAL-LOAN       PIC 9(9)V99 VALUE ZERO.
+       01 EDIT-LOAN        PIC Z(9)V99 VALUE ZERO.
+       01 INTEREST-RATE    PIC 999V99  VALUE ZERO.  *> INTEREST OF 5%
+       01 EDIT-RATE        PIC ZZZ.99.
+       01 INTEREST-RATEP   PIC ZZZ     VALUE ZERO.
+       01 MONTHS           PIC 999     VALUE ZERO.
+       01 EDIT-MONTHS      PIC ZZZ     VALUE ZERO.
+       01 YEARS            PIC 999     VALUE 10.
+       01 EDIT-YEARS       PIC ZZZ.
+       01 DYEARS           PIC ZZZ     VALUE ZERO.
+       01 MONTHLY-PAYMENT  PIC 9(9)V99.
+       01 EDIT-PAYMENT     PIC Z(9)V99.
+       01 CHECK-LOAN       PIC 9.
+       01 CHECK-RATE       PIC 9.
+       01 CHECK-YEAR       PIC 9.
+       PROCEDURE DIVISION.
+       LOAN-CATCH.
+           DISPLAY 'INPUT LOAN'.
+           ACCEPT EDIT-LOAN.
+           COMPUTE CHECK-LOAN = FUNCTION TEST-NUMVAL(EDIT-LOAN).
+           DISPLAY EDIT-LOAN.
+           IF CHECK-LOAN = 2
+              DISPLAY "Invalid numeric entry."
+              GO TO LOAN-CATCH
+           END-IF.
+           IF EDIT-LOAN < 0
+              DISPLAY "Invalid numeric entry."
+              GO TO LOAN-CATCH
+           END-IF.
+           IF EDIT-LOAN > 999999999
+              DISPLAY "Invalid numeric entry."
+              GO TO LOAN-CATCH
+           END-IF.
+       RATE-CATCH.
+           DISPLAY 'INPUT RATE'.
+           ACCEPT EDIT-RATE.
+           COMPUTE CHECK-RATE = FUNCTION TEST-NUMVAL(EDIT-RATE).
+           DISPLAY EDIT-RATE.
+           IF CHECK-RATE = 7
+              DISPLAY "Invalid numeric entry."
+              GO TO RATE-CATCH
+           END-IF.
+           IF EDIT-RATE < 0
+              DISPLAY "Invalid numeric entry."
+              GO TO RATE-CATCH
+           END-IF.
+           IF EDIT-RATE > 999
+              DISPLAY "Invalid numeric entry."
+              GO TO RATE-CATCH
+           END-IF.
+       YEARS-CATCH.
+           DISPLAY 'INPUT YEARS'.
+           ACCEPT EDIT-YEARS.
+           DISPLAY EDIT-YEARS.
+           COMPUTE CHECK-YEAR = FUNCTION TEST-NUMVAL(EDIT-YEARS).
+           IF CHECK-YEAR = 3
+              DISPLAY "Invalid numeric entry."
+              GO TO YEARS-CATCH
+           END-IF.
+           IF EDIT-YEARS < 0
+              DISPLAY "Invalid numeric entry."
+              GO TO YEARS-CATCH
+           END-IF.
+           IF EDIT-YEARS > 999
+              DISPLAY "Invalid numeric entry."
+              GO TO YEARS-CATCH
+           END-IF.
+           COMPUTE INTEREST-RATE = FUNCTION NUMVAL(EDIT-RATE).
+           COMPUTE YEARS = FUNCTION NUMVAL(EDIT-YEARS).
+           COMPUTE TOTAL-LOAN = FUNCTION NUMVAL(EDIT-LOAN).
+           IF EDIT-YEARS > 999
+              DISPLAY "Invalid numeric entry."
+              GO TO YEARS-CATCH
+           END-IF.
+           COMPUTE INTEREST-RATEP = INTEREST-RATE * 100.
+           DISPLAY 'TOTAL-LOAN: ' EDIT-LOAN ' USD - INTEREST-RATE: ',
+           INTEREST-RATEP '%'
+           DISPLAY ' Y   M        AMOUNT '
+           DISPLAY '--- --- -------------'
+           PERFORM YEARS TIMES
+              ADD 12 TO MONTHS
+              COMPUTE MONTHLY-PAYMENT = TOTAL-LOAN * FUNCTION ANNUITY,
+              ((INTEREST-RATE / 12), MONTHS)
+              COMPUTE DYEARS = MONTHS / 12
+              MOVE MONTHS TO EDIT-MONTHS
+              MOVE MONTHLY-PAYMENT TO EDIT-PAYMENT
+              DISPLAY DYEARS ' ' EDIT-MONTHS ' ' EDIT-PAYMENT ' USD'
+           END-PERFORM.
+           GOBACK.

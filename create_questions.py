@@ -5,10 +5,15 @@ mainframe concepts, and functions for model training
 """
 
 def load_example_file(filename):
-    """Load example file contents and return as string"""
+    """Load example file contents and return as string wrapped in markdown code blocks"""
     try:
         with open(f'code_examples/{filename}', 'r') as f:
-            return f.read()
+            content = f.read()
+            # Detect code type based on filename
+            if 'jcl' in filename.lower():
+                return f"```jcl\n{content}\n```"
+            else:
+                return f"```cobol\n{content}\n```"
     except FileNotFoundError:
         return ""
     except Exception as e:
@@ -33,6 +38,21 @@ def generate_cobol_structure_qa():
         {"text": f"Q: Can you write me an example of a PROCEDURE DIVISION?\n A: Sure! Here is an example of a PROCEDURE DIVISION in a COBOL program:\n\n{load_example_file('example_PROC_DIV')}\n\n"},
         {"text": f"Q: What is a paragraph in COBOL?.\n A: In COBOL, a paragraph is a logical subdivision of code within a section or a division, acting as a labeled block of one or more sentences (statements) that perform a specific function. They are a key structural element, particularly in the PROCEDURE DIVISION, to organize program logic."},
         {"text": f"Q: What is a sentence in COBOL?\n A: In COBOL, a sentence is a sequence of one or more statements, appearing in the PROCEDURE DIVISION, that terminates with a period. It is considered the smallest executable unit in a program's logic flow, forming a complete command."},
+        {"text": f"Q: What is a PIC or PICTURE clause in COBOL?\n A: The PICTURE clause specifies the general characteristics and editing requirements of an elementary item. PIC is an abbreviation for PICTURE and has the same meaning. The PICTURE clause can be specified only at the elementary level and defines the size, type, and editing format of data fields in your program."},
+        {"text": f"Q: When is the PICTURE clause required in COBOL?\n A: The PICTURE clause must be specified for every elementary item except the following: Index data items, the subject of the RENAMES clause, items described with USAGE POINTER, USAGE FUNCTION-POINTER, USAGE PROCEDURE-POINTER, or USAGE OBJECT REFERENCE, and internal floating-point data items. In these cases, use of the PICTURE clause is prohibited."},
+        {"text": f"Q: What are the different USAGE types for PICTURE clauses?\n A: The USAGE clause affects how character positions in a PICTURE clause are interpreted. The main types are: DISPLAY (Alphanumeric, 1 byte per character), DISPLAY-1 (DBCS, 2 bytes per character), NATIONAL (National characters, 2 bytes per character), and UTF-8 (1 to 4 bytes per character). All other usages use conceptual character positions."},
+        {"text": f"Q: What does the 9 symbol mean in a PICTURE clause?\n A: The 9 symbol represents a numeric character position that contains a numeral. Each 9 specifies one decimal digit in the value of the item. For usages DISPLAY and NATIONAL, each 9 is counted as one character position in the size of the data item."},
+        {"text": f"Q: What does the S symbol mean in a PICTURE clause?\n A: The S symbol is an indicator of the presence of an operational sign, which indicates whether the value of an item is positive or negative. The S is not counted in the size of the elementary item, unless an associated SIGN clause specifies the SEPARATE CHARACTER phrase, which would be counted as one character position."},
+        {"text": f"Q: What does the V symbol mean in a PICTURE clause?\n A: The V symbol is an indicator of the location of the assumed decimal point. It does not represent a character position in the item. When the assumed decimal point is to the right of the rightmost symbol in the string, the V is redundant. It is not counted in the size of the elementary item."},
+        {"text": f"Q: What does the P symbol mean in a PICTURE clause?\n A: The P symbol represents an assumed decimal scaling position, used to specify the location of an assumed decimal point when the point is not within the number that appears in the data item. P is not counted in the size of the data item, but scaling position characters are counted in determining the maximum number of digit positions in numeric-edited items or in items used as arithmetic operands."},
+        {"text": f"Q: What does the A symbol mean in a PICTURE clause?\n A: The A symbol represents a character position that can contain only a letter of the Latin alphabet or a space. Each 'A' is counted as one character position in the size of the data item."},
+        {"text": f"Q: What does the X symbol mean in a PICTURE clause?\n A: The X symbol represents a character position that can contain any allowable character from the alphanumeric character set of the computer. Each 'X' is counted as one character position in the size of the data item."},
+        {"text": f"Q: What does the Z symbol mean in a PICTURE clause?\n A: The Z symbol is a leading numeric character position. When that position contains a zero, a space character replaces the zero. This is used for editing numeric values to suppress leading zeros. Each 'Z' is counted as one character position in the size of the data item."},
+        {"text": f"Q: What editing symbols can I use in a PICTURE clause for signs and currency?\n A: You can use several editing symbols for sign control and currency: + and - for sign display, CR and DB for credit/debit indicators, and cs (any currency symbol like $) for currency sign values. The default currency symbol is the dollar sign ($). Each character used in these editing symbols is counted as one character position in the size of the data item."},
+        {"text": f"Q: What does the asterisk (*) symbol mean in a PICTURE clause?\n A: The asterisk (*) is a check protect symbol and represents a leading numeric character position. When that position contains a zero, an asterisk is inserted in its place. This is used to protect or highlight fields such as check amounts. Each asterisk is counted as one character position in the size of the item."},
+        {"text": f"Q: What do the / , and . symbols mean in a PICTURE clause?\n A: These are editing symbols for formatting: the / symbol inserts a slash character, the , symbol inserts a comma, and the . symbol represents the decimal point for alignment purposes and inserts a period. Each of these symbols is counted as one character position in the size of the data item."},
+        {"text": f"Q: What does the 0 symbol mean in a PICTURE clause?\n A: The 0 symbol represents a character position into which the numeral zero is inserted. It is used when you want to force a zero to appear in a specific position of the data value. Each zero is counted as one character position in the size of the data item."},
+        {"text": f"Q: What do B, E, G, N, and U symbols mean in a PICTURE clause?\n A: These symbols handle special character types: B inserts spaces (alphanumeric, DBCS, or national depending on USAGE), E marks the start of the exponent in floating-point items, G is a DBCS character position, N is a DBCS or national character position depending on compiler options and USAGE, and U is a UTF-8 character position where USAGE UTF-8 is assumed. Each is counted as one character position."},
     ]
 
 def generate_mainframe_concepts_qa():
@@ -50,28 +70,25 @@ def generate_mainframe_concepts_qa():
         {"text": "Q: What are return codes and how do I use them?\n A: return codes (RCs) are conventionally used to indicate the success or failure of a job step. Programs running within a JCL step set these codes upon termination, following a standard convention. "},
     ]
 
-def generate_cobol_debugging_qa():
-    """Generate questions about debugging COBOL"""
-    return [
-        {"text": "Q: \n A: "},
-    ]
-
 def generate_cobol_functions_qa():
     """Generate questions about COBOL functions and operations"""
     return [
-        {"text": "Q: \n A: "},
-    ]
-
-def generate_cobol_code_correction_qa():
-    """Generate questions about correcting COBOL code"""
-    return [
-        {"text": "Q: \n A: "},
+        {"text": f"Q:How would I get the current date and time in COBOL?\n A: You can use the intrinsic function CURRENT-DATE to get the current date using COBOL. Here is an example of how to use it {load_example_file('example_current_date_cobol.txt')}\n\n."},
+        {"text": f"Q:How would I get the mean of a number in COBOL?\nA: You can use the intrisic function MEAN to calculate the mean of a set of numbers in COBOL."},
+        {"text": f"Q:How would I get the standard deviation of a set of numbers in COBOL?\nA: You can use the intrinsic function STANDARD-DEVIATION to calculate the standard deviation of a set of numbers in COBOL."},
+        {"text": f"Q:In COBOL how do I get the value of PI?\nA: You can use the intrinsic function PI to get the value of π in COBOL."},
+        {"text": f"Q:How do I get a random number in COBOL?\nA: You can use the intrinsic function RANDOM to generate a random number in COBOL."},
+        {"text": f"Q:How do I reverse a string in COBOL?\nA: You can use the intrinsic function REVERSE to reverse a string in COBOL."},
+        {"text": f"Q:How do I calculate the square root of a number in COBOL?\nA: You can use the intrinsic function SQRT to calculate the square root of a number in COBOL."},
+        {"text": f"Q:How do I get the absolute value of a number in COBOL?\nA: You can use the intrinsic function ABS to get the absolute value of a number in COBOL."},
+        {"text": f"Q:How do I get the remainder of a division in COBOL?\nA: You can use the intrinsic function REM to get the remainder of a division in COBOL."},
     ]
 
 def generate_cobol_code_generation_qa():
     """Generate questions about generating COBOL code"""
     return [
-        {"text": "Q: \n A: "},
+        {"text": f"Q:Create me a COBOL program to calculate the annuity of a loan \n A: Sure! here is an example of a COBOL program that calculates the annuity of a loan {load_example_file('example_annuity_cobol.txt')}\n\n."},
+        {'text': f"Q:Create me a COBOL program that writes the current date and time as well as a name\n Here is a simple COBOL program that writes the current date and time along with a name {load_example_file('example_current_date_and_name_COBOL.txt')}\n\n."},
     ]
 
 def generate_jcl_qa():
@@ -93,37 +110,32 @@ def generate_jcl_qa():
         {"text": f"Q: How do I give my job more memory or space to run a job?\n A: "},
     ]
 
-def generate_jcl_code_correction_qa():
-    """Generate questions about correcting JCL code"""
-    return [
-        {"text": "Q: \n A: "},
-    ]
-
 def generate_jcl_code_generation_qa():
     """Generate questions about generating JCL code"""
     return [
-        {"text": "Q: \n A: "},
+        {"text": f"Q: Create me a simple JCL job to run a COBOL program.\n A: Sure! Here is a simple example of a JCL job that runs a COBOL program {load_example_file('example_JCL_cobol.txt')}\n\n"},
+        {"text": f"Q: Create me a JCL job to run a COBOL program that reads from an input dataset and writes to an output dataset.\n A: Here is an example of a JCL job that runs a COBOL program which reads from an input dataset and writes to an output dataset {load_example_file('example_JCL_COBOL_FILEREAD.txt')}\n\n"},
     ]
 
 def generate_cobol_errors_qa():
     """Generate questions about COBOL errors and ABENDs"""
     return [
-        {"text": "Q: What is S0C1 error?\n A: S0C1 is an operation exception. The CPU attempted to execute an invalid or non-existent instruction. In COBOL this commonly happens when a program branches to an incorrect address (such as an uninitialized procedure pointer) or when the load module or called subprogram is corrupt or mismatched. To resolve it, verify that all CALLed programs are present and correctly link-edited, ensure that any procedure or function pointers are initialized before use, and re-link if the load module may be damaged."},
-        {"text": "Q: What is S0C4 error?\n A: S0C4 is an addressing error. The program attempted to access storage it does not own or a misaligned address. In COBOL this is often caused by invalid subscripts or indexes, using reference modification with out-of-range offsets, or corrupting pointers through incorrect CALL arguments. To resolve it, use the dump to identify the failing instruction and data item, check array bounds and reference modifications, turn on bounds-checking or SSRANGE where possible, and correct any logic that drives indexes or pointers outside the allocated storage."},
-        {"text": "Q: What is S0C7 error?\n A: S0C7 is a data exception caused by invalid numeric data in a field that is used in arithmetic or otherwise treated as numeric. Typical causes include spaces or non-numeric characters in a packed-decimal (COMP-3) or zoned-decimal field, or bad group moves overlaying numeric items. To resolve it, locate the failing instruction and the offending field in the dump, validate the input data and any group-level MOVEs, ensure that numeric fields are properly initialized, and add data validation or edit checks before performing arithmetic."},
-        {"text": "Q: What is S0C9 error?\n A: S0C9 is a divide exception. The program attempted an invalid divide operation, such as dividing by zero or producing a quotient too large for the target field. To resolve it, review all DIVIDE statements near the failing instruction, ensure that divisors are checked for zero or invalid values, widen result fields if necessary, and add range checks before performing the division."},
-        {"text": "Q: What is S0CB error?\n A: S0CB is a decimal overflow exception. A decimal arithmetic operation produced a result that could not fit into the target packed or zoned decimal field. To resolve it, examine the arithmetic statement at the failing instruction, increase the size or precision of the target field, or add validation and scaling logic so that intermediate and final results remain within the defined PICTURE ranges."},
-        {"text": "Q: What is U4038 error?\n A: U4038 is a user ABEND frequently issued by Language Environment (LE) when a COBOL run-time condition is not handled. Typical causes include unhandled file status errors, invalid arguments on intrinsic functions, or severe run-time conditions where LE terminates the program. To resolve it, check the LE message text in the job log (CEE3xxx messages) for the underlying condition, correct the COBOL logic or data that caused the error, and optionally enable condition-handling or more detailed LE diagnostics."},
-        {"text": "Q: What is S213 error?\n A: S213 indicates an I/O or dataset access problem. Common causes include a missing dataset, incorrect data set name, catalog problems, or insufficient security authorization for the requested dataset. It can also occur when the dataset is on an unavailable or offline volume. To resolve it, verify the DD statement's DSN, DISP, and volume information, ensure that the dataset exists and is cataloged, check RACF or other security settings for access permissions, and correct any typos or mismatches between the JCL and the actual dataset."},
-        {"text": "Q: What is S013-18 error?\n A: S013-18 is a dataset open error related to record format or length. It usually occurs when the program's FD/LRECL/RECFM does not match the actual dataset attributes, or when the JCL DCB parameters are inconsistent with the COBOL file description. To resolve it, compare the dataset's LRECL, BLKSIZE, and RECFM (from LISTCAT or ISPF 3.4) to the COBOL FD and any DCB parameters in the DD statement, then make them consistent and rerun the job."},
-        {"text": "Q: What is SB37 error?\n A: SB37 is a space allocation error indicating that a sequential dataset ran out of primary and secondary extents on the current volume. This often happens when the output grows larger than anticipated and no more space can be extended. To resolve it, increase the primary and secondary SPACE allocation in the DD statement, choose a unit or volume with more availability, or optimize the program to write less data."},
-        {"text": "Q: What is SD37 error?\n A: SD37 is a space error indicating that a dataset exhausted its primary space and no secondary space was defined. The system cannot extend the dataset further. To resolve it, add a nonzero secondary quantity to the SPACE parameter, increase the primary allocation, or reduce the amount of data written by the program so that it fits within the allocated space."},
-        {"text": "Q: What is SE37 error?\n A: SE37 is a space error indicating that a dataset has reached the maximum number of extents or volumes available. For example, a PDS might reach its 16-extent limit or a multi-volume sequential dataset may have used all allocated volumes. To resolve it, increase the SPACE allocation on fewer but larger volumes, redesign the dataset to require fewer extents (e.g., use a larger primary and smaller secondary), or split the output across multiple datasets."},
-        {"text": "Q: What is S322 error?\n A: S322 indicates that the job or step exceeded its CPU or time limit and was cancelled by the system. This commonly occurs with loops or very long-running jobs where TIME parameters are too restrictive. To resolve it, check for infinite or excessive loops in the COBOL program, optimize expensive processing, and if the logic is correct, increase the TIME or REGION limits in the JCL as appropriate per site standards."},
-        {"text": "Q: What is S522 error?\n A: S522 indicates that a job was cancelled because it was waiting too long for an event such as operator intervention or resource availability. In many shops this arises from jobs waiting at a console prompt or for a tape, mount, or other resource that never arrives. To resolve it, verify that the job does not require manual replies, ensure necessary resources (such as tapes or devices) are available, and consider removing any code that depends on console I/O in batch."},
-        {"text": "Q: What is S806 error?\n A: S806 indicates that the program could not be found in the STEPLIB, JOBLIB, or system linklist libraries. The module named in the JCL EXEC PARM or PROC PGM parameter is not available to be loaded. To resolve it, verify the program name, confirm that the load module is link-edited into a library in the appropriate STEPLIB or JOBLIB concatenation, ensure that the library is cataloged and accessible, and correct any spelling or concatenation errors in the JCL."},
-        {"text": "Q: What is IEC161I error?\n A: IEC161I is a message typically associated with end-of-file and file status issues on QSAM datasets (often paired with ABEND codes). It can appear when a dataset is not opened correctly or when an unexpected end-of-file or I/O condition is reached. To resolve it, check the COBOL file status field after OPEN and READ/WRITE operations, make sure the DD statement correctly defines the dataset, and ensure that the program's record format and length match the dataset attributes."},
-        {"text": "Q: What is IEC130I error?\n A: IEC130I is a dataset attribute error, often indicating an invalid or inconsistent DCB parameter (such as an illegal BLKSIZE or RECFM). It can be associated with S013 abends. To resolve it, correct the DCB parameters on the DD statement, ensure that BLKSIZE is valid for the device and LRECL, and align the JCL definitions with the actual dataset and the COBOL FD."},
+        {"text": f"Q: What is S0C1 error?\n A: S0C1 is an operation exception. The CPU attempted to execute an invalid or non-existent instruction. In COBOL this commonly happens when a program branches to an incorrect address (such as an uninitialized procedure pointer) or when the load module or called subprogram is corrupt or mismatched. To resolve it, verify that all CALLed programs are present and correctly link-edited, ensure that any procedure or function pointers are initialized before use, and re-link if the load module may be damaged."},
+        {"text": f"Q: What is S0C4 error?\n A: S0C4 is an addressing error. The program attempted to access storage it does not own or a misaligned address. In COBOL this is often caused by invalid subscripts or indexes, using reference modification with out-of-range offsets, or corrupting pointers through incorrect CALL arguments. To resolve it, use the dump to identify the failing instruction and data item, check array bounds and reference modifications, turn on bounds-checking or SSRANGE where possible, and correct any logic that drives indexes or pointers outside the allocated storage."},
+        {"text": f"Q: What is S0C7 error?\n A: S0C7 is a data exception caused by invalid numeric data in a field that is used in arithmetic or otherwise treated as numeric. Typical causes include spaces or non-numeric characters in a packed-decimal (COMP-3) or zoned-decimal field, or bad group moves overlaying numeric items. To resolve it, locate the failing instruction and the offending field in the dump, validate the input data and any group-level MOVEs, ensure that numeric fields are properly initialized, and add data validation or edit checks before performing arithmetic."},
+        {"text": f"Q: What is S0C9 error?\n A: S0C9 is a divide exception. The program attempted an invalid divide operation, such as dividing by zero or producing a quotient too large for the target field. To resolve it, review all DIVIDE statements near the failing instruction, ensure that divisors are checked for zero or invalid values, widen result fields if necessary, and add range checks before performing the division."},
+        {"text": f"Q: What is S0CB error?\n A: S0CB is a decimal overflow exception. A decimal arithmetic operation produced a result that could not fit into the target packed or zoned decimal field. To resolve it, examine the arithmetic statement at the failing instruction, increase the size or precision of the target field, or add validation and scaling logic so that intermediate and final results remain within the defined PICTURE ranges."},
+        {"text": f"Q: What is U4038 error?\n A: U4038 is a user ABEND frequently issued by Language Environment (LE) when a COBOL run-time condition is not handled. Typical causes include unhandled file status errors, invalid arguments on intrinsic functions, or severe run-time conditions where LE terminates the program. To resolve it, check the LE message text in the job log (CEE3xxx messages) for the underlying condition, correct the COBOL logic or data that caused the error, and optionally enable condition-handling or more detailed LE diagnostics."},
+        {"text": f"Q: What is S213 error?\n A: S213 indicates an I/O or dataset access problem. Common causes include a missing dataset, incorrect data set name, catalog problems, or insufficient security authorization for the requested dataset. It can also occur when the dataset is on an unavailable or offline volume. To resolve it, verify the DD statement's DSN, DISP, and volume information, ensure that the dataset exists and is cataloged, check RACF or other security settings for access permissions, and correct any typos or mismatches between the JCL and the actual dataset."},
+        {"text": f"Q: What is S013-18 error?\n A: S013-18 is a dataset open error related to record format or length. It usually occurs when the program's FD/LRECL/RECFM does not match the actual dataset attributes, or when the JCL DCB parameters are inconsistent with the COBOL file description. To resolve it, compare the dataset's LRECL, BLKSIZE, and RECFM (from LISTCAT or ISPF 3.4) to the COBOL FD and any DCB parameters in the DD statement, then make them consistent and rerun the job."},
+        {"text": f"Q: What is SB37 error?\n A: SB37 is a space allocation error indicating that a sequential dataset ran out of primary and secondary extents on the current volume. This often happens when the output grows larger than anticipated and no more space can be extended. To resolve it, increase the primary and secondary SPACE allocation in the DD statement, choose a unit or volume with more availability, or optimize the program to write less data."},
+        {"text": f"Q: What is SD37 error?\n A: SD37 is a space error indicating that a dataset exhausted its primary space and no secondary space was defined. The system cannot extend the dataset further. To resolve it, add a nonzero secondary quantity to the SPACE parameter, increase the primary allocation, or reduce the amount of data written by the program so that it fits within the allocated space."},
+        {"text": f"Q: What is SE37 error?\n A: SE37 is a space error indicating that a dataset has reached the maximum number of extents or volumes available. For example, a PDS might reach its 16-extent limit or a multi-volume sequential dataset may have used all allocated volumes. To resolve it, increase the SPACE allocation on fewer but larger volumes, redesign the dataset to require fewer extents (e.g., use a larger primary and smaller secondary), or split the output across multiple datasets."},
+        {"text": f"Q: What is S322 error?\n A: S322 indicates that the job or step exceeded its CPU or time limit and was cancelled by the system. This commonly occurs with loops or very long-running jobs where TIME parameters are too restrictive. To resolve it, check for infinite or excessive loops in the COBOL program, optimize expensive processing, and if the logic is correct, increase the TIME or REGION limits in the JCL as appropriate per site standards."},
+        {"text": f"Q: What is S522 error?\n A: S522 indicates that a job was cancelled because it was waiting too long for an event such as operator intervention or resource availability. In many shops this arises from jobs waiting at a console prompt or for a tape, mount, or other resource that never arrives. To resolve it, verify that the job does not require manual replies, ensure necessary resources (such as tapes or devices) are available, and consider removing any code that depends on console I/O in batch."},
+        {"text": f"Q: What is S806 error?\n A: S806 indicates that the program could not be found in the STEPLIB, JOBLIB, or system linklist libraries. The module named in the JCL EXEC PARM or PROC PGM parameter is not available to be loaded. To resolve it, verify the program name, confirm that the load module is link-edited into a library in the appropriate STEPLIB or JOBLIB concatenation, ensure that the library is cataloged and accessible, and correct any spelling or concatenation errors in the JCL."},
+        {"text": f"Q: What is IEC161I error?\n A: IEC161I is a message typically associated with end-of-file and file status issues on QSAM datasets (often paired with ABEND codes). It can appear when a dataset is not opened correctly or when an unexpected end-of-file or I/O condition is reached. To resolve it, check the COBOL file status field after OPEN and READ/WRITE operations, make sure the DD statement correctly defines the dataset, and ensure that the program's record format and length match the dataset attributes."},
+        {"text": f"Q: What is IEC130I error?\n A: IEC130I is a dataset attribute error, often indicating an invalid or inconsistent DCB parameter (such as an illegal BLKSIZE or RECFM). It can be associated with S013 abends. To resolve it, correct the DCB parameters on the DD statement, ensure that BLKSIZE is valid for the device and LRECL, and align the JCL definitions with the actual dataset and the COBOL FD."},
     ]
 
 def generate_combined_training_samples():
@@ -131,13 +143,10 @@ def generate_combined_training_samples():
     all_samples = []
     
     all_samples.extend(generate_cobol_structure_qa())
-    all_samples.extend(generate_cobol_debugging_qa())
     all_samples.extend(generate_mainframe_concepts_qa())
     all_samples.extend(generate_jcl_qa())
     all_samples.extend(generate_cobol_functions_qa())
-    all_samples.extend(generate_cobol_code_correction_qa())
     all_samples.extend(generate_cobol_code_generation_qa())
-    all_samples.extend(generate_jcl_code_correction_qa())
     all_samples.extend(generate_jcl_code_generation_qa())
     all_samples.extend(generate_cobol_errors_qa())
 
